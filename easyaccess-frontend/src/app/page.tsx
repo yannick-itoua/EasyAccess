@@ -19,6 +19,12 @@ type FilterOptions = {
   parkingAvailable: boolean;
 };
 
+export async function fetchLocationsPaginated(page = 0, size = 10) {
+  const res = await fetch(`http://localhost:8080/api/locations?page=${page}&size=${size}`);
+  if (!res.ok) throw new Error("Failed to fetch locations");
+  return res.json(); // Should return { content, totalPages, ... }
+}
+
 export default function HomePage() {
   const router = useRouter();
   const [locations, setLocations] = useState<Location[]>([]);
@@ -31,6 +37,15 @@ export default function HomePage() {
     wideEntrance: false,
     parkingAvailable: false,
   });
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    fetchLocationsPaginated(page, 10).then(data => {
+      setLocations(data.content); // <-- use the array inside 'content'
+      setTotalPages(data.totalPages);
+    });
+  }, [page]);
 
   useEffect(() => {
     fetchLocations({
@@ -71,6 +86,23 @@ export default function HomePage() {
             />
           ))
         )}
+      </div>
+      <div className="flex justify-between mt-4">
+        <button
+          disabled={page === 0}
+          onClick={() => setPage(page - 1)}
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span>Page {page + 1} of {totalPages}</span>
+        <button
+          disabled={page + 1 >= totalPages}
+          onClick={() => setPage(page + 1)}
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
