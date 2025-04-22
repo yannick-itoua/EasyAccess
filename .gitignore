@@ -1,0 +1,39 @@
+# --- GLOBAL ---
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local
+.env.*.local
+
+# --- BACKEND (Spring Boot/Java) ---
+/target/
+/bin/
+/out/
+*.iml
+*.class
+*.jar
+*.war
+*.db
+*.h2.db
+/.idea/
+/*.iws
+/.project
+/.classpath
+/.settings/
+
+# --- FRONTEND (Next.js/Node) ---
+/node_modules/
+/.next/
+/out/
+/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# --- SYSTEM ---
+.vscode/
+*.swp
+*.swo
