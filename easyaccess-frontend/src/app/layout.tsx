@@ -1,3 +1,4 @@
+import { UserProvider } from "./context/UserContext";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import type { ReactNode } from "react";
@@ -11,8 +12,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className="bg-gray-100 min-h-screen">
-        <Navbar />
-        <main>{children}</main>
+        <UserProvider>
+          <Navbar />
+          <main>{children}</main>
+        </UserProvider>
       </body>
     </html>
   );

@@ -19,12 +19,6 @@ type FilterOptions = {
   parkingAvailable: boolean;
 };
 
-export async function fetchLocationsPaginated(page = 0, size = 10) {
-  const res = await fetch(`http://localhost:8080/api/locations?page=${page}&size=${size}`);
-  if (!res.ok) throw new Error("Failed to fetch locations");
-  return res.json(); // Should return { content, totalPages, ... }
-}
-
 export default function HomePage() {
   const router = useRouter();
   const [locations, setLocations] = useState<Location[]>([]);
@@ -37,31 +31,28 @@ export default function HomePage() {
     wideEntrance: false,
     parkingAvailable: false,
   });
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchLocationsPaginated(page, 10).then(data => {
-      setLocations(data.content); // <-- use the array inside 'content'
-      setTotalPages(data.totalPages);
-    });
-  }, [page]);
+    fetchLocations()
+      .then(data => {
+        setLocations(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setError("Failed to load locations."));
+  }, []);
 
-  useEffect(() => {
-    fetchLocations({
-      country: filters.country || undefined,
-      city: filters.city || undefined,
-      village: filters.village || undefined,
-    }).then(setLocations);
-  }, [filters.country, filters.city, filters.village]);
-
-  const filteredLocations = locations.filter((loc) => {
-    if (filters.wheelchairAccessible && !loc.wheelchairAccessible) return false;
-    if (filters.accessibleToilet && !loc.accessibleToilet) return false;
-    if (filters.wideEntrance && !loc.wideEntrance) return false;
-    if (filters.parkingAvailable && !loc.parkingAvailable) return false;
-    return true;
-  });
+  const filteredLocations = Array.isArray(locations)
+    ? locations.filter((loc) => {
+        if (filters.country && loc.country?.toLowerCase() !== filters.country.toLowerCase()) return false;
+        if (filters.city && loc.city?.toLowerCase() !== filters.city.toLowerCase()) return false;
+        if (filters.village && loc.village?.toLowerCase() !== filters.village.toLowerCase()) return false;
+        if (filters.wheelchairAccessible && !loc.wheelchairAccessible) return false;
+        if (filters.accessibleToilet && !loc.accessibleToilet) return false;
+        if (filters.wideEntrance && !loc.wideEntrance) return false;
+        if (filters.parkingAvailable && !loc.parkingAvailable) return false;
+        return true;
+      })
+    : [];
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow">
@@ -70,6 +61,7 @@ export default function HomePage() {
         Find and share accessible public spaces in your city. Filter by accessibility features and explore locations on the map!
       </p>
       <FilterBar filters={filters} onChange={setFilters} />
+      {error && <p className="text-red-600">{error}</p>}
       <div className="mb-8">
         <Map locations={filteredLocations} />
       </div>
@@ -86,23 +78,6 @@ export default function HomePage() {
             />
           ))
         )}
-      </div>
-      <div className="flex justify-between mt-4">
-        <button
-          disabled={page === 0}
-          onClick={() => setPage(page - 1)}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span>Page {page + 1} of {totalPages}</span>
-        <button
-          disabled={page + 1 >= totalPages}
-          onClick={() => setPage(page + 1)}
-          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
       </div>
     </div>
   );

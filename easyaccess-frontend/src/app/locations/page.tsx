@@ -11,7 +11,15 @@ export default function LocationsPage() {
 
   useEffect(() => {
     fetchLocations()
-      .then(setLocations)
+      .then(data => {
+        if (Array.isArray(data)) {
+          setLocations(data);
+        } else if (data && Array.isArray(data.content)) {
+          setLocations(data.content);
+        } else {
+          setLocations([]);
+        }
+      })
       .catch(() => setError("Failed to load locations."));
   }, []);
 
@@ -29,7 +37,7 @@ export default function LocationsPage() {
         <p>No locations found. Add one!</p>
       )}
       <ul className="space-y-4">
-        {locations.map((loc) => (
+        {Array.isArray(locations) && locations.map((loc) => (
           <li
             key={loc.id}
             className="border rounded p-4 hover:bg-gray-50 cursor-pointer"

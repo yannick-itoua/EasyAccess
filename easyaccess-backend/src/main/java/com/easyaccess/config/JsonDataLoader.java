@@ -16,13 +16,17 @@ public class JsonDataLoader {
     @Bean
     CommandLineRunner loadJsonData(LocationRepository locationRepository) {
         return args -> {
-            ObjectMapper mapper = new ObjectMapper();
-            TypeReference<List<Location>> typeReference = new TypeReference<>() {};
-            InputStream inputStream = getClass().getResourceAsStream("/accessible-locations.json");
-            if (inputStream != null) {
-                List<Location> locations = mapper.readValue(inputStream, typeReference);
-                locationRepository.saveAll(locations);
-                System.out.println("Sample locations loaded!");
+            if (locationRepository.count() == 0) { // Only load if empty
+                ObjectMapper mapper = new ObjectMapper();
+                TypeReference<List<Location>> typeReference = new TypeReference<>() {};
+                InputStream inputStream = getClass().getResourceAsStream("/accessible-locations.json");
+                if (inputStream != null) {
+                    List<Location> locations = mapper.readValue(inputStream, typeReference);
+                    locationRepository.saveAll(locations);
+                    System.out.println("Sample locations loaded!");
+                }
+            } else {
+                System.out.println("Locations table not empty, skipping sample data load.");
             }
         };
     }

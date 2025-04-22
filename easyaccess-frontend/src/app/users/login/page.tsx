@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchUsers, User } from "../../utils/api";
+import { useUser } from "../../context/UserContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useUser();
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -27,6 +29,7 @@ export default function LoginPage() {
           u.username === form.username && u.password === form.password
       );
       if (user) {
+        setUser(user);
         localStorage.setItem("user", JSON.stringify(user));
         router.push("/");
       } else {

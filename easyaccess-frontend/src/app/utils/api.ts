@@ -2,13 +2,16 @@
 export interface Location {
   id?: number;
   name: string;
-  description?: string;
   latitude: number;
   longitude: number;
-  wheelchairAccessible: boolean;
-  accessibleToilet: boolean;
-  wideEntrance: boolean;
-  parkingAvailable: boolean;
+  description?: string;
+  country?: string;
+  city?: string;
+  village?: string;
+  wheelchairAccessible?: boolean;
+  accessibleToilet?: boolean;
+  wideEntrance?: boolean;
+  parkingAvailable?: boolean;
 }
 
 export interface User {
@@ -27,7 +30,7 @@ export async function fetchLocations(filters?: {
   country?: string;
   city?: string;
   village?: string;
-}): Promise<Location[]> {
+}): Promise<Location[] | { content: Location[], totalPages: number }> {
   let url = "http://localhost:8080/api/locations";
   const params = new URLSearchParams();
   if (filters?.country) params.append("country", filters.country);
@@ -37,6 +40,12 @@ export async function fetchLocations(filters?: {
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch locations");
   return res.json();
+}
+
+export async function fetchLocationsPaginated(page = 0, size = 10) {
+  const res = await fetch(`http://localhost:8080/api/locations?page=${page}&size=${size}`);
+  if (!res.ok) throw new Error("Failed to fetch locations");
+  return res.json(); // Should return { content, totalPages, ... }
 }
 
 export async function fetchLocationById(id: number): Promise<Location> {
